@@ -36,7 +36,12 @@ import java.util.Map;
 
 /**
  * ServiceFactoryBean
- *
+ * @description
+ *  InitializingBean : bean初始化使用三种方式一种在xml中定义init-method,另一种实现InitializingBean接口，在一种通过在方法上面@PostConstruct
+ *  DisposableBean :   bean销毁使用三种方式一种在xml中定义destory-method,另一种实现DisposableBean接口，在一中通过在方法上面@PreDestroy
+ *  ApplicationContextAware : 将ApplicationContext注入实现接口类中，可以方便的获取各个bean
+ *  ApplicationListener : 观察者模式，当发生该事件的时候可以获得通知
+ *  BeanNameAware ： ：实现该接口的bean会意识到自己在beanfactory的的名字
  * @export
  */
 public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean, DisposableBean, ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>, BeanNameAware {
