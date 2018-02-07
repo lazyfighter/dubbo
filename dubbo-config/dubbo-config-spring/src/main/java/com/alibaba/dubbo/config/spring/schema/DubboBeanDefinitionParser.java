@@ -43,6 +43,7 @@ import org.w3c.dom.NodeList;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -71,33 +72,39 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
         beanDefinition.setBeanClass(beanClass);
         beanDefinition.setLazyInit(false);
         String id = element.getAttribute("id");
-        if ((id == null || id.length() == 0) && required) {
+        //如果id为空，同时又需要id的话进行id的创建，默认为name属性，如有冲突为name2++
+        if (StringUtils.isBlank(id) && required) {
             String generatedBeanName = element.getAttribute("name");
-            if (generatedBeanName == null || generatedBeanName.length() == 0) {
+            if (StringUtils.isBlank(generatedBeanName)) {
                 if (ProtocolConfig.class.equals(beanClass)) {
                     generatedBeanName = "dubbo";
                 } else {
                     generatedBeanName = element.getAttribute("interface");
                 }
             }
-            if (generatedBeanName == null || generatedBeanName.length() == 0) {
+            if (StringUtils.isBlank(generatedBeanName)) {
                 generatedBeanName = beanClass.getName();
             }
             id = generatedBeanName;
             int counter = 2;
+            //此处的检查是否存在bean比较鸡肋，个人认为应该在spring容器初始化完成之后再注册bean，然后refresh，这样会解决bean冲突，
+            //否则如果在dubbo后面配置相应的bean会覆盖掉原dubbo-bean
             while (parserContext.getRegistry().containsBeanDefinition(id)) {
                 id = generatedBeanName + (counter++);
             }
         }
-        if (id != null && id.length() > 0) {
+        //id 构建完成，开始注册bean，
+        if (StringUtils.isNotEmpty(id)) {
             if (parserContext.getRegistry().containsBeanDefinition(id)) {
                 throw new IllegalStateException("Duplicate spring bean id " + id);
             }
             parserContext.getRegistry().registerBeanDefinition(id, beanDefinition);
             beanDefinition.getPropertyValues().addPropertyValue("id", id);
         }
+        //协议config
         if (ProtocolConfig.class.equals(beanClass)) {
-            for (String name : parserContext.getRegistry().getBeanDefinitionNames()) {
+            String[] beanDefinitionNames = parserContext.getRegistry().getBeanDefinitionNames();
+            for (String name : beanDefinitionNames) {
                 BeanDefinition definition = parserContext.getRegistry().getBeanDefinition(name);
                 PropertyValue property = definition.getPropertyValues().getPropertyValue("protocol");
                 if (property != null) {
@@ -107,6 +114,7 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
                     }
                 }
             }
+        //服务bean
         } else if (ServiceBean.class.equals(beanClass)) {
             String className = element.getAttribute("class");
             if (className != null && className.length() > 0) {
@@ -401,6 +409,7 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
     }
 
     public BeanDefinition parse(Element element, ParserContext parserContext) {
+        System.out.println("调试加载bean:" + beanClass);
         return parse(element, parserContext, beanClass, required);
     }
 

@@ -22,7 +22,7 @@ limitations under the License.
        http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
     <!-- provider's application name, used for tracing dependency relationship -->
-    <dubbo:application name="demo-provider"/>
+    <dubbo:application name="demo-provider" />
 
     <!-- use multicast registry center to export service -->
     <dubbo:registry address="zookeeper://192.168.1.108:2181"/>
@@ -34,6 +34,9 @@ limitations under the License.
     <bean id="demoService" class="com.alibaba.dubbo.demo.provider.DemoServiceImpl"/>
 
     <!-- declare the service interface to be exported -->
-    <dubbo:service interface="com.alibaba.dubbo.demo.DemoService" ref="demoService"/>
+    <dubbo:service interface="com.alibaba.dubbo.demo.DemoService" ref="demoService" />
+
+    <dubbo:provider loadbalance="random"></dubbo:provider>
+
 
 </beans>
