@@ -409,7 +409,7 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
     }
 
     public BeanDefinition parse(Element element, ParserContext parserContext) {
-        System.out.println("调试加载bean:" + beanClass);
+        logger.debug("调试加载bean:{}" + beanClass.getName());
         return parse(element, parserContext, beanClass, required);
     }
 
